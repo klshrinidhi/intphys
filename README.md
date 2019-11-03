@@ -135,6 +135,28 @@ this have not been tested.
 
         ./Tools/build/build_package.sh
 
+  **TROUBLESHOOT**
+  * During compilation, there may be errors in libpng++ library. Because it is a header-only library, it may seem easier to download
+  lib from nognu.org/pngpp. However, every version from 0.2.1 to 0.2.10 has one problem -- exceptions. UnrealEngine disables exceptions
+  during compilation and libpng++ uses exceptions. Though using libpng++ from non-standard locations should generally work, it does not
+  in this case. It is better to use libpng++ package installed in standard /usr/include/png++ by the command above. In my case, I had
+  libpng++ 0.2.5 installed.
+  If the error is:
+  ![](readme_pics/pic1.png)
+  Then a solution is:
+  -- Include header `#include <string>`
+  -- Change `(message + ": ")` to `(message + std::string{": "})`
+
+  * During compilation there may be other errors in the intphys plugin.
+  If the error is:
+  ![](readme_pics/pic2.png)
+  Then a solution is:
+  Change `PyExc_Exception, TCHAR_TO_UTF8(*outErrorMsg.ToString())` to `PyExc_Exception, "%s", TCHAR_TO_UTF8(*outErrorMsg.ToString())`
+  If the error is:
+  ![](readme_pics/pic3.png)
+  The a solution is:
+  Change `*u_function->GetName()` to `TCHAR_TO_UTF8(*u_function->GetName())`
+
 
 ## Usage
 
