@@ -26,7 +26,7 @@ class INTPHYS_API UScreenshotManager : public UBlueprintFunctionLibrary
     GENERATED_BODY()
 
 private:
-    static TSharedPtr<FScreenshot> Screenshot;
+    static TArray<TSharedPtr<FScreenshot>> Screenshots;
 
 public:
     /**
@@ -49,7 +49,7 @@ public:
     UFUNCTION(BlueprintCallable, Category="IntPhys")
     static bool Initialize(
         int Width, int Height, int NumFrames,
-        AActor* OriginActor,
+        TArray<AActor*>& OriginActors,
         int32 RandomSeed,
         bool Verbose = false);
 
@@ -100,7 +100,7 @@ public:
      * This usually a camera.
      */
     UFUNCTION(BlueprintCallable, Category="IntPhys")
-    static void SetOriginActor(AActor* Actor);
+    static void SetOriginActors(TArray<AActor*>& Actors);
 
     /**
      * Returns true if the Actor is visible in the captured frame indexed by

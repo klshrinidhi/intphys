@@ -163,11 +163,11 @@ class Train(Scene):
         a train scene.
 
         """
-        self.params['Camera'] = CameraParams(
-            location=FVector(
-                0, 0, random.uniform(175, 225)),
-            rotation=FRotator(
-                0, random.uniform(-10, 10), random.uniform(-10, 10)))
+        self.params['Camera'] = [
+            CameraParams(location=FVector(0, 0, random.uniform(175, 225)),
+                         rotation=FRotator(0, random.uniform(-10, 10),
+                                           random.uniform(-10, 10)))
+            for _ in range(len(self.saver.cameras))]
 
         self.params['Floor'] = FloorParams(
             material=get_random_material('Floor'))

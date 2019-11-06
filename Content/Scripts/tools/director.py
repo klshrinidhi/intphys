@@ -179,7 +179,7 @@ class Director(object):
         ticks).
 
     """
-    def __init__(self, world, scenes_json, size, output_dir,
+    def __init__(self, world, scenes_json, size, num_cams_per_scene, output_dir,
                  seed, pause_duration=30):
         # the world in which the scenes are rendered
         self.world = world
@@ -205,11 +205,12 @@ class Director(object):
         # manage the pauses at the beginning of each scene
         self.pauser = PauseManager(self.world, pause_duration)
 
-        # create the camera
-        self.camera = Camera(self.world)
+        # create the cameras
+        self.cameras = [Camera(self.world)
+                        for _ in range(num_cams_per_scene)]
 
         # manage the scenes capture and saving to disk
-        self.saver = Saver(self.camera, size, seed, output_dir=output_dir)
+        self.saver = Saver(self.cameras, size, seed, output_dir=output_dir)
 
         self.scene_factory = SceneFactory(self.world, self.saver)
 
@@ -267,7 +268,8 @@ class Director(object):
         # a scene is running, if it is valid, simply continue and capture
         # screenshots, if it becomes invalid, restart it
         else:
-            if self.current_scene.is_valid() and self.camera.is_valid:
+            if (self.current_scene.is_valid() and
+                all(camera.is_valid for camera in self.cameras)):
                 self.current_scene.tick()
                 if self.ticker % 2 == 1:
                     self.current_scene.capture()
@@ -296,7 +298,9 @@ class Director(object):
                     else 'visible'))
 
         # setup the camera parameters and setup the new scene (spawn actors)
-        self.camera.setup(self.current_scene.params['Camera'])
+        for camera,params in zip(self.cameras,
+                                 self.current_scene.params['Camera']):
+            camera.setup(params)
         self.current_scene.play_run()
 
         # if the scene is not valid (because of overlapping actors for

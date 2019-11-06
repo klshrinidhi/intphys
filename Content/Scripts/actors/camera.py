@@ -10,6 +10,7 @@ class Camera:
     _camera_class = ue.load_class('/Game/Camera.Camera_C')
 
     def __init__(self, world, params=CameraParams()):
+        self._world = world
         self._actor = world.actor_spawn(self._camera_class)
         self._actor.bind_event('OnActorBeginOverlap', self._on_overlap)
         self._component = self._actor.get_component_by_type(CameraComponent)
@@ -98,3 +99,11 @@ class Camera:
             'field_of_view': self.field_of_view,
             'aspect_ratio': self.aspect_ratio,
             'projection_mode': self.projection_mode}
+
+    def set_view_target(self):
+        # Attach the viewport to the camera. This initialization was present
+        # in the intphys-1.0 blueprint but seems to be useless in UE-4.17.
+        # This is maybe done by default.
+        player_controller = GameplayStatics.GetPlayerController(self._world, 0)
+        player_controller.SetViewTargetWithBlend(NewViewTarget=self._actor)
+        

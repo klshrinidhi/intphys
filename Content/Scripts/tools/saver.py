@@ -29,9 +29,9 @@ class Saver:
         save anything.
 
     """
-    def __init__(self, camera, size, seed, output_dir=None):
+    def __init__(self, cameras, size, seed, output_dir=None):
         self.size = size
-        self.camera = camera
+        self.cameras = cameras
         self.is_dry_mode = True if output_dir is None else False
         self.output_dir = output_dir
 
@@ -40,15 +40,16 @@ class Saver:
         self.status = []
 
         # initialize the capture.
-        verbose = False
+        verbose = True
         ScreenshotManager.Initialize(
             int(self.size[0]), int(self.size[1]), int(self.size[2]),
-            self.camera.actor,
+            [camera.actor for camera in cameras],
             seed, verbose)
 
     def set_status_header(self, header):
         self.status_header = header
-        self.status_header['camera'] = self.camera.get_status()
+        self.status_header['camera'] = [camera.get_status()
+                                        for camera in self.cameras]
 
     def capture(self, ignored_actors, status):
         """Push the scene's current screenshot and status to memory"""
