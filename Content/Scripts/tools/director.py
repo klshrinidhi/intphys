@@ -48,14 +48,15 @@ class SceneFactory:
     parse, the program exits with an error message.
 
     """
-    def __init__(self, world, saver):
+    def __init__(self, world, saver, num_cams_per_scene):
         self._world = world
         self._saver = saver
         self._classes = {}
+        self.num_cams_per_scene = num_cams_per_scene
 
     def get_train(self):
         """Returns an instance of a train scene"""
-        return Train(self._world, self._saver)
+        return Train(self._world, self._saver, self.num_cams_per_scene)
 
     def get_sandbox(self):
         """Returns an instance of a sandbox scene"""
@@ -179,7 +180,7 @@ class Director(object):
         ticks).
 
     """
-    def __init__(self, world, scenes_json, size, output_dir,
+    def __init__(self, world, scenes_json, size, num_cams_per_scene, output_dir,
                  seed, pause_duration=30):
         # the world in which the scenes are rendered
         self.world = world
@@ -209,13 +210,16 @@ class Director(object):
         self.camera = Camera(self.world)
 
         # manage the scenes capture and saving to disk
+        size = (size[0],size[1],size[2]*num_cams_per_scene)
         self.saver = Saver(self.camera, size, seed, output_dir=output_dir)
 
-        self.scene_factory = SceneFactory(self.world, self.saver)
+        self.scene_factory = SceneFactory(self.world, self.saver,
+                                          num_cams_per_scene)
 
         # the list of the scenes being rendered by the director, as instances
         # of the class Scene.
         self.scenes = list(self.scene_factory.parse(scenes_json))
+        self.num_cams_per_scene = num_cams_per_scene
 
         # dry mode and dev/test scenes are incompatible, make sure this is not
         # the case
@@ -270,7 +274,9 @@ class Director(object):
             if self.current_scene.is_valid() and self.camera.is_valid:
                 self.current_scene.tick()
                 if self.ticker % 2 == 1:
-                    self.current_scene.capture()
+                    for idx in range(self.num_cams_per_scene):
+                        self.camera.setup(self.current_scene.cam_params[idx])
+                        self.current_scene.capture()
                 self.ticker += 1
             else:
                 # the scene is not valid, reschedule it with new parameters and
@@ -296,7 +302,7 @@ class Director(object):
                     else 'visible'))
 
         # setup the camera parameters and setup the new scene (spawn actors)
-        self.camera.setup(self.current_scene.params['Camera'])
+        self.camera.setup(self.current_scene.cam_params[0])
         self.current_scene.play_run()
 
         # if the scene is not valid (because of overlapping actors for

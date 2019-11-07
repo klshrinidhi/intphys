@@ -28,7 +28,8 @@ class Train(Scene):
     def description(self):
         return 'physically plausible train scene'
 
-    def __init__(self, world, saver):
+    def __init__(self, world, saver, num_cams_per_scene):
+        self.num_cams_per_scene = num_cams_per_scene
         super().__init__(world, saver, 'train')
         self._is_valid = True
 
@@ -163,11 +164,13 @@ class Train(Scene):
         a train scene.
 
         """
-        self.params['Camera'] = CameraParams(
+        self.cam_params = [CameraParams(
             location=FVector(
                 0, 0, random.uniform(175, 225)),
             rotation=FRotator(
                 0, random.uniform(-10, 10), random.uniform(-10, 10)))
+                            for _ in range(self.num_cams_per_scene)]
+        self.params['Camera'] = self.cam_params[0]
 
         self.params['Floor'] = FloorParams(
             material=get_random_material('Floor'))
