@@ -163,11 +163,26 @@ class Train(Scene):
         a train scene.
 
         """
-        self.params['Camera'] = CameraParams(
+        import numpy as np
+        # self.cam_params = [CameraParams(
+        #     location=FVector(
+        #         0, 0, random.uniform(175, 225)),
+        #     rotation=FRotator(
+        #         0, random.uniform(-10, 10), random.uniform(-10, 10)))
+        #                    for _ in range(2)]
+        self.cam_params = [CameraParams(
             location=FVector(
                 0, 0, random.uniform(175, 225)),
             rotation=FRotator(
-                0, random.uniform(-10, 10), random.uniform(-10, 10)))
+                0, random.uniform(-10, 10), random.uniform(-10, 10)))]
+        yaw = self.cam_params[0].rotation.yaw
+        yaw = np.deg2rad(yaw)
+        location = np.array([np.cos(yaw),np.sin(yaw),random.uniform(175, 225)])
+        location = FVector(*list(location*300))
+        rotation = FRotator(0,0,yaw+180)
+        self.cam_params += [CameraParams(location=location,
+                                         rotation=rotation)]
+        self.params['Camera'] = self.cam_params[0]
 
         self.params['Floor'] = FloorParams(
             material=get_random_material('Floor'))

@@ -3,6 +3,7 @@ import json
 import os
 import random
 import shutil
+import time
 
 import unreal_engine as ue
 from unreal_engine.classes import GameplayStatics
@@ -205,10 +206,16 @@ class Director(object):
         # manage the pauses at the beginning of each scene
         self.pauser = PauseManager(self.world, pause_duration)
 
+        # pause at every timestep to capture from all cam locations
+        self.capture_pauser = PauseManager(self.world, 1)
+
+        self.cam_idx = 0
+
         # create the camera
         self.camera = Camera(self.world)
 
         # manage the scenes capture and saving to disk
+        size = (size[0],size[1],size[2]*2)
         self.saver = Saver(self.camera, size, seed, output_dir=output_dir)
 
         self.scene_factory = SceneFactory(self.world, self.saver)
@@ -268,10 +275,17 @@ class Director(object):
         # screenshots, if it becomes invalid, restart it
         else:
             if self.current_scene.is_valid() and self.camera.is_valid:
-                self.current_scene.tick()
+                if not self.capture_pauser.is_paused():
+                    self.current_scene.tick()
                 if self.ticker % 2 == 1:
                     self.current_scene.capture()
-                self.ticker += 1
+                    self.capture_pauser.tick()
+                    if self.cam_idx == 0:
+                        self.capture_pauser.pause()
+                    self.cam_idx = (self.cam_idx + 1) % 2
+                    self.camera.use_param(self.cam_idx)
+                if not self.capture_pauser.is_paused():
+                    self.ticker += 1
             else:
                 # the scene is not valid, reschedule it with new parameters and
                 # prepare for the next scene
@@ -296,7 +310,8 @@ class Director(object):
                     else 'visible'))
 
         # setup the camera parameters and setup the new scene (spawn actors)
-        self.camera.setup(self.current_scene.params['Camera'])
+        self.camera.set_params(self.current_scene.cam_params)
+        self.camera.use_param(0)
         self.current_scene.play_run()
 
         # if the scene is not valid (because of overlapping actors for

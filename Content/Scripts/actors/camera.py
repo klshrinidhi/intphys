@@ -10,6 +10,7 @@ class Camera:
     _camera_class = ue.load_class('/Game/Camera.Camera_C')
 
     def __init__(self, world, params=CameraParams()):
+        self._world = world
         self._actor = world.actor_spawn(self._camera_class)
         self._actor.bind_event('OnActorBeginOverlap', self._on_overlap)
         self._component = self._actor.get_component_by_type(CameraComponent)
@@ -24,6 +25,7 @@ class Camera:
         self._actor.SetTickableWhenPaused(True)
         self._component.SetTickableWhenPaused(True)
         self.setup(params)
+        self.params = list()
 
     def _on_overlap(self, me, other):
         if me != other:
@@ -90,11 +92,19 @@ class Camera:
         self.projection_mode = params.projection_mode
         self._is_valid = True
 
+    def set_params(self, params):
+        self.params = params
+        
+    def use_param(self, idx):
+        self.location = self.params[idx].location
+        self.rotation = self.params[idx].rotation
+
     def get_status(self):
-        return {
-            'name': self._actor.get_name(),
-            'location': as_dict(self.location),
-            'rotation': as_dict(self.rotation),
-            'field_of_view': self.field_of_view,
-            'aspect_ratio': self.aspect_ratio,
-            'projection_mode': self.projection_mode}
+        status = [{'name': self._actor.get_name(),
+                   'location': as_dict(param.location),
+                   'rotation': as_dict(param.rotation),
+                   'field_of_view': self.field_of_view,
+                   'aspect_ratio': self.aspect_ratio,
+                   'projection_mode': self.projection_mode}
+                  for param in self.params]
+        return status
