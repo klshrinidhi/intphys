@@ -206,16 +206,17 @@ class Director(object):
         # manage the pauses at the beginning of each scene
         self.pauser = PauseManager(self.world, pause_duration)
 
-        # pause at every timestep to capture from all cam locations
-        self.capture_pauser = PauseManager(self.world, 1)
-
+        self.num_cams = 8
         self.cam_idx = 0
+
+        # pause at every timestep to capture from all cam locations
+        self.capture_pauser = PauseManager(self.world,self.num_cams)
 
         # create the camera
         self.camera = Camera(self.world)
 
         # manage the scenes capture and saving to disk
-        size = (size[0],size[1],size[2]*2)
+        size = (size[0],size[1],size[2]*self.num_cams)
         self.saver = Saver(self.camera, size, seed, output_dir=output_dir)
 
         self.scene_factory = SceneFactory(self.world, self.saver)
@@ -248,6 +249,7 @@ class Director(object):
         return len(self.scenes)
 
     def tick(self, dt):
+        # ue.log(f'Director.tick() beg {self.ticker}')
         """this method is called at each game tick by UE"""
         # if the renderer is paused, just wait the end of the pause
         self.pauser.tick()
@@ -278,11 +280,12 @@ class Director(object):
                 if not self.capture_pauser.is_paused():
                     self.current_scene.tick()
                 if self.ticker % 2 == 1:
-                    self.current_scene.capture()
-                    self.capture_pauser.tick()
                     if self.cam_idx == 0:
                         self.capture_pauser.pause()
-                    self.cam_idx = (self.cam_idx + 1) % 2
+                    # ue.log(f'Director.tick() capture {self.cam_idx}')
+                    self.current_scene.capture()
+                    self.capture_pauser.tick()
+                    self.cam_idx = (self.cam_idx + 1) % self.num_cams
                     self.camera.use_param(self.cam_idx)
                 if not self.capture_pauser.is_paused():
                     self.ticker += 1
@@ -296,6 +299,7 @@ class Director(object):
                 self.ticker = 0
 
     def _start_scene(self):
+        # ue.log('Director._start_scene()')
         # log a brief description of the scene being started
         if self.current_scene.run == 0:
             if 'train' in self.current_scene.name:
@@ -310,8 +314,11 @@ class Director(object):
                     else 'visible'))
 
         # setup the camera parameters and setup the new scene (spawn actors)
-        self.camera.set_params(self.current_scene.cam_params)
-        self.camera.use_param(0)
+        self.camera.set_params(self.current_scene.params['Camera'])
+        while self.capture_pauser.is_paused():
+            self.capture_pauser.tick()
+        self.cam_idx = 0
+        self.camera.use_param(self.cam_idx)
         self.current_scene.play_run()
 
         # if the scene is not valid (because of overlapping actors for
@@ -325,6 +332,7 @@ class Director(object):
         #         self.current_scene.tick()
 
     def _stop_scene(self):
+        # ue.log('Director::_stop_scene()')
         run_stopped = self.current_scene.stop_run(
             self.counter[self.current_scene.category],
             self.total_scenes)
@@ -384,6 +392,7 @@ class Director(object):
         possible/impossible runs in test and dev scenes
 
         """
+        # ue.log('Director._terminate()')
         if self.num_restarted_scenes:
             percent_restarted = (
                 self.num_restarted_scenes / self.total_scenes)

@@ -32,7 +32,8 @@ class Camera:
             message = '{} overlapping {}'.format(
                 self._actor.get_name(), other.get_name())
             ue.log(message)
-            self._is_valid = False
+            #if 'Camera' not in other.get_name():
+            #    self._is_valid = False
 
     @property
     def actor(self):
@@ -40,6 +41,7 @@ class Camera:
 
     @property
     def is_valid(self):
+        # ue.log(f'Camera.is_valid() {self._is_valid}')
         return self._is_valid
 
     @property

@@ -5,6 +5,7 @@ import importlib
 import math
 import random
 
+import unreal_engine as ue
 from unreal_engine import FLinearColor, FRotator, FVector
 from unreal_engine.classes import SpawnManager
 
@@ -29,6 +30,7 @@ class Train(Scene):
         return 'physically plausible train scene'
 
     def __init__(self, world, saver):
+        # ue.log('Train.__init__()')
         super().__init__(world, saver, 'train')
         self._is_valid = True
 
@@ -59,6 +61,7 @@ class Train(Scene):
 
     def stop_run(self, scene_index, total):
         """Save the scene and delete the actors"""
+        # ue.log('Train.stop_run()')
         super().stop_run()
 
         if not self.saver.is_dry_mode:
@@ -139,6 +142,11 @@ class Train(Scene):
         module = importlib.import_module(module_path)
         actor_class = getattr(module, name.split('_')[0].title())
 
+        print('#'*100)
+        print(module)
+        print(actor_class)
+        print('#'*100)
+
         # instanciate the actor (spawn it in the world)
         actor = actor_class(world=self.world, params=params)
 
@@ -163,6 +171,7 @@ class Train(Scene):
         a train scene.
 
         """
+        # ue.log('Train.generate_parameters()')
         import numpy as np
         # self.cam_params = [CameraParams(
         #     location=FVector(
@@ -170,19 +179,23 @@ class Train(Scene):
         #     rotation=FRotator(
         #         0, random.uniform(-10, 10), random.uniform(-10, 10)))
         #                    for _ in range(2)]
-        self.cam_params = [CameraParams(
-            location=FVector(
-                0, 0, random.uniform(175, 225)),
-            rotation=FRotator(
-                0, random.uniform(-10, 10), random.uniform(-10, 10)))]
-        yaw = self.cam_params[0].rotation.yaw
+        cam_params = list()
+        RADIUS = 500
+        yaw = random.uniform(-10,10)
         yaw = np.deg2rad(yaw)
-        location = np.array([np.cos(yaw),np.sin(yaw),random.uniform(175, 225)])
-        location = FVector(*list(location*300))
-        rotation = FRotator(0,0,yaw+180)
-        self.cam_params += [CameraParams(location=location,
-                                         rotation=rotation)]
-        self.params['Camera'] = self.cam_params[0]
+        center = np.array([np.cos(yaw),np.sin(yaw)])*RADIUS
+        yaw_beg = int(round(np.rad2deg(yaw+np.pi)))
+        for yaw in range(yaw_beg,yaw_beg+360,45):
+            yaw = np.deg2rad(yaw)
+            radius = np.array([np.cos(yaw),np.sin(yaw)])*RADIUS
+            location = center+radius
+            yaw = int(round(np.rad2deg(yaw+np.pi)))
+            location = FVector(*location,random.uniform(175,225))
+            rotation = FRotator(0,random.uniform(-10,10),
+                                random.uniform(yaw-10,yaw+10))
+            cam_params.append(CameraParams(location=location,
+                                           rotation=rotation))
+        self.params['Camera'] = cam_params
 
         self.params['Floor'] = FloorParams(
             material=get_random_material('Floor'))

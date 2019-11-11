@@ -5,6 +5,7 @@ import unreal_engine as ue
 
 class Scene:
     def __init__(self, world, saver, category):
+        # ue.log('Scene.__init__()')
         self.world = world
         self.params = {}
         self.saver = saver
@@ -45,10 +46,13 @@ class Scene:
             self.spawn_actors()
 
     def stop_run(self):
+        # ue.log('Scene.stop_run()')
         self.saver.set_status_header(self.get_status_header())
 
     def is_valid(self):
-        return self._is_valid and all(a.is_valid for a in self.actors.values())
+        valid = self._is_valid and all(a.is_valid for a in self.actors.values())
+        # ue.log(f'Scene.is_valid() {valid}')
+        return valid
 
     def is_possible(self):
         """Return True if the current run is plausible, False otherwise"""

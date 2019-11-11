@@ -52,6 +52,7 @@ class Saver:
 
     def capture(self, ignored_actors, status):
         """Push the scene's current screenshot and status to memory"""
+        # ue.log('Saver.capture()')
         if not self.is_dry_mode:
             # scene, depth and masks images are stored from C++
             ScreenshotManager.Capture(ignored_actors)
@@ -61,6 +62,7 @@ class Saver:
 
     def reset(self, reset_actors):
         """Reset the saver and delete all data in cache"""
+        # ue.log('Saver.reset()')
         if not self.is_dry_mode:
             ScreenshotManager.Reset(reset_actors)
             self.status_header = {}
@@ -68,6 +70,7 @@ class Saver:
 
     def save(self, output_dir):
         """Save the captured data to `output_dir`"""
+        # ue.log('Saver.save()')
         if self.is_dry_mode:
             return True
 

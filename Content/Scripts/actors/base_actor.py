@@ -91,7 +91,8 @@ class BaseActor:
             message = '{} overlapping {}'.format(
                 self.actor.get_name(), other.get_name())
             ue.log(message)
-            self.is_valid = False
+            if 'Camera' not in other.get_name():
+                self.is_valid = False
 
     def on_actor_hit(self, me, other, *args):
         """When an the actor is hitting another actor a message is printed.
