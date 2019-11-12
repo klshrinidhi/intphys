@@ -210,7 +210,7 @@ class Director(object):
         self.cam_idx = 0
 
         # pause at every timestep to capture from all cam locations
-        self.capture_pauser = PauseManager(self.world,self.num_cams)
+        self.capture_pauser = PauseManager(self.world,self.num_cams+10)
 
         # create the camera
         self.camera = Camera(self.world)
@@ -280,13 +280,14 @@ class Director(object):
                 if not self.capture_pauser.is_paused():
                     self.current_scene.tick()
                 if self.ticker % 2 == 1:
-                    if self.cam_idx == 0:
+                    if self.cam_idx == 0 and not self.capture_pauser.is_paused():
                         self.capture_pauser.pause()
-                    # ue.log(f'Director.tick() capture {self.cam_idx}')
-                    self.current_scene.capture()
+                    if self.capture_pauser._remaining <= self.num_cams:
+                        # ue.log(f'Director.tick() capture {self.cam_idx}')
+                        self.current_scene.capture()
+                        self.cam_idx = (self.cam_idx + 1) % self.num_cams
+                        self.camera.use_param(self.cam_idx)
                     self.capture_pauser.tick()
-                    self.cam_idx = (self.cam_idx + 1) % self.num_cams
-                    self.camera.use_param(self.cam_idx)
                 if not self.capture_pauser.is_paused():
                     self.ticker += 1
             else:

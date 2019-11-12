@@ -18,7 +18,7 @@ DEFAULT_RESOLUTION = (288, 288)
 DEFAULT_PAUSE_DURATION = 50
 
 # the number of frames captured for each scene
-NUM_FRAMES_PER_SCENE = 100
+NUM_FRAMES_PER_SCENE = 50
 
 
 class Main:

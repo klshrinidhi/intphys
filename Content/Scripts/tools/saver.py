@@ -54,6 +54,11 @@ class Saver:
         """Push the scene's current screenshot and status to memory"""
         # ue.log('Saver.capture()')
         if not self.is_dry_mode:
+            # location = self.camera.location
+            # rotation = self.camera.rotation
+            # location = f'loc: [{location.x:0.2f},{location.y:0.2f},{location.z:0.2f}]'
+            # rotation = f'rot: [{rotation.roll:0.2f},{rotation.pitch:0.2f},{rotation.yaw:0.2f}]'
+            # ue.log(f'Saver.capture() {location} {rotation}')
             # scene, depth and masks images are stored from C++
             ScreenshotManager.Capture(ignored_actors)
 

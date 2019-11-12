@@ -1,14 +1,20 @@
-import pathlib,json
+import pathlib,json,imageio
+import numpy as np
 from tqdm import tqdm
 
 NUM_CAMS = 8
-NUM_FRAMES = 100
+NUM_FRAMES = 50
 NUM_IMAGES = NUM_CAMS*NUM_FRAMES
-OUTPUT_D = pathlib.Path('/home/guest/intphys/output_merged/train')
+OUTPUT_D = pathlib.Path('/home/guest/intphys/output/train')
 scene_ds = list(OUTPUT_D.iterdir())
 
 def splice_images(images):
     images = list(sorted(images))
+    prev_img = None
+    for image in images:
+        curr_img = imageio.imread(str(image))
+        assert not np.all(np.equal(curr_img,prev_img))
+        prev_img = curr_img
     for cam_idx in range(NUM_CAMS):
         cam_images = images[cam_idx::NUM_CAMS]
         assert len(cam_images) == NUM_FRAMES
@@ -25,6 +31,14 @@ def make_pose(status):
     frames = status['frames']
     uniq_frames = frames[::NUM_CAMS]
     pose['frames'] = uniq_frames
+    for cam_idx in range(NUM_CAMS):
+        cam_frames = frames[cam_idx::NUM_CAMS]
+        assert len(uniq_frames) == len(cam_frames)
+        for f1,f2 in zip(uniq_frames,cam_frames):
+            for k in f1:
+                if 'occluder' in k or 'object' in k:
+                    assert f1[k]['location'] == f2[k]['location']
+                    assert f1[k]['rotation'] == f2[k]['rotation']
     return pose
 
 for scene_d in tqdm(scene_ds):
