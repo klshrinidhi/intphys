@@ -19,6 +19,9 @@ class CameraParams:
 
 @dataclass
 class FloorParams:
+    """
+    Mesh size --> [400,400,20]
+    """
     material: str = get_random_material('Floor')
     scale: FVector = FVector(10, 20, 1)
     location: FVector = FVector(0, 0, 0)
@@ -67,6 +70,9 @@ class PaneHandlesParams:
 
 @dataclass
 class WallsParams:
+    """
+    Mesh size --> [400,20,400]
+    """
     material: str = get_random_material('Wall')
     length: float = 2000
     depth: float = 1000
@@ -78,6 +84,9 @@ class WallsParams:
 
 @dataclass
 class ObjectParams:
+    """
+    Mesh size --> [100,100,100]
+    """
     mesh: str = 'Sphere'
     material: str = get_random_material('Object')
     location: FVector = FVector(0, 0, 0)
@@ -94,6 +103,9 @@ class ObjectParams:
 
 @dataclass
 class OccluderParams:
+    """
+    Mesh size --> [400,20,200]
+    """
     material: str = get_random_material('Wall')
     location: FVector = FVector(0, 0, 0)
     rotation: FRotator = FRotator(0, 0, 0)
