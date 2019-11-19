@@ -8,13 +8,14 @@ NUM_IMAGES = NUM_CAMS*NUM_FRAMES
 OUTPUT_D = pathlib.Path('/home/guest/intphys/output/train')
 scene_ds = list(OUTPUT_D.iterdir())
 
-def splice_images(images):
+def splice_images(images, check=True):
     images = list(sorted(images))
     prev_img = None
-    for image in images:
-        curr_img = imageio.imread(str(image))
-        assert not np.all(np.equal(curr_img,prev_img))
-        prev_img = curr_img
+    if check:
+        for image in images:
+            curr_img = imageio.imread(str(image))
+            assert not np.all(np.equal(curr_img,prev_img))
+            prev_img = curr_img
     for cam_idx in range(NUM_CAMS):
         cam_images = images[cam_idx::NUM_CAMS]
         assert len(cam_images) == NUM_FRAMES

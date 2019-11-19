@@ -185,6 +185,7 @@ class Train(Scene):
         yaw = np.deg2rad(yaw)
         center = np.array([np.cos(yaw),np.sin(yaw)])*RADIUS
         yaw_beg = int(round(np.rad2deg(yaw+np.pi)))
+        # ue.log('#'*100)
         for yaw in range(yaw_beg,yaw_beg+360,45):
             yaw = np.deg2rad(yaw)
             radius = np.array([np.cos(yaw),np.sin(yaw)])*RADIUS
@@ -195,6 +196,20 @@ class Train(Scene):
                                 random.uniform(yaw-10,yaw+10))
             cam_params.append(CameraParams(location=location,
                                            rotation=rotation))
+
+            # import sys,scipy.spatial
+            # Rotation = scipy.spatial.transform.Rotation
+            # rot = [rotation.roll,-rotation.pitch,rotation.yaw]
+            # quat = rotation.quaternion()
+            # quat = [quat.x,quat.y,quat.z,quat.w]
+            # # quat_euler = Rotation.from_quat(quat).as_euler('xyz',degrees=True)
+            # # print(rot,quat_euler)
+            # rot_dcm = Rotation.from_euler('xyz',rot,degrees=True).as_dcm()
+            # quat_dcm = Rotation.from_quat(quat).as_dcm()
+            # for r in range(3):
+            #     print(' rot:',rot_dcm.tolist()[r])
+            #     print('quat:',quat_dcm.tolist()[r])
+            # sys.exit()
         self.params['Camera'] = cam_params
 
         self.params['Floor'] = FloorParams(

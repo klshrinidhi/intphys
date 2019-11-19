@@ -5,7 +5,7 @@ NUM_CAMS = 8
 NUM_FRAMES = 50
 NUM_IMAGES = NUM_CAMS*NUM_FRAMES
 
-OUTPUT_D = pathlib.Path('/home/guest/intphys/output_test/train')
+OUTPUT_D = pathlib.Path('/home/guest/intphys/output/train')
 
 for scene_d in tqdm(list(OUTPUT_D.iterdir())):
     depth_d = scene_d/'depth'

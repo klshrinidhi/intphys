@@ -5,7 +5,7 @@ ROOT_D = pathlib.Path('/home/guest/intphys')
 OUTPUT_D = pathlib.Path('/home/guest/intphys/output/train')
 OUTPUT_D.mkdir(parents=True,exist_ok=True)
 
-output_ds = ROOT_D.glob('output_test/train')
+output_ds = ROOT_D.glob('output_*/train')
 scene_ds = [scene_d
             for output_d in output_ds
             for scene_d in output_d.iterdir()]
