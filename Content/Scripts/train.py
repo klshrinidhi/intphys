@@ -45,11 +45,6 @@ class Train(Scene):
         return False
 
     def capture(self):
-        # location = self.actors['object_1'].location
-        # rotation = self.actors['object_1'].rotation
-        # location = f'loc: [{location.x:0.2f},{location.y:0.2f},{location.z:0.2f}]'
-        # rotation = f'rot: [{rotation.roll:0.2f},{rotation.pitch:0.2f},{rotation.yaw:0.2f}]'
-        # ue.log(f'Train.capture() object_1 {location} {rotation}')
         self.saver.capture(ignored_actors=[], status=self.get_status())
 
     def is_over(self):

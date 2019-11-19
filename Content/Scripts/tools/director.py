@@ -180,8 +180,8 @@ class Director(object):
         ticks).
 
     """
-    def __init__(self, world, scenes_json, size, output_dir,
-                 seed, pause_duration=30):
+    def __init__(self, world, scenes_json, size, num_cams_per_scene,
+                 output_dir, seed, pause_duration=30):
         # the world in which the scenes are rendered
         self.world = world
 
@@ -206,17 +206,13 @@ class Director(object):
         # manage the pauses at the beginning of each scene
         self.pauser = PauseManager(self.world, pause_duration)
 
-        self.num_cams = 8
+        self.num_cams = num_cams_per_scene
         self.cam_idx = 0
-
-        # pause at every timestep to capture from all cam locations
-        self.capture_pauser = PauseManager(self.world,self.num_cams*2+5)
 
         # create the camera
         self.camera = Camera(self.world)
 
         # manage the scenes capture and saving to disk
-        size = (size[0],size[1],size[2]*self.num_cams)
         self.saver = Saver(self.camera, size, seed, output_dir=output_dir)
 
         self.scene_factory = SceneFactory(self.world, self.saver)
@@ -277,19 +273,12 @@ class Director(object):
         # screenshots, if it becomes invalid, restart it
         else:
             if self.current_scene.is_valid() and self.camera.is_valid:
-                if not self.capture_pauser.is_paused():
-                    self.current_scene.tick()
-                if self.ticker % 2 == 1:
-                    if self.cam_idx == 0 and not self.capture_pauser.is_paused():
-                        self.capture_pauser.pause()
-                    if self.capture_pauser._remaining == (self.num_cams-1-self.cam_idx)*2:
-                        # ue.log(f'Director.tick() capture {self.cam_idx}')
-                        self.current_scene.capture()
-                        self.cam_idx = (self.cam_idx + 1) % self.num_cams
-                        self.camera.use_param(self.cam_idx)
-                    self.capture_pauser.tick()
-                if not self.capture_pauser.is_paused():
-                    self.ticker += 1
+                self.current_scene.tick()
+                if self.ticker % 2 == 0:
+                    self.current_scene.capture()
+                    self.cam_idx = (self.cam_idx + 1) % self.num_cams
+                self.camera.use_param(self.cam_idx)
+                self.ticker += 1
             else:
                 # the scene is not valid, reschedule it with new parameters and
                 # prepare for the next scene
@@ -316,10 +305,7 @@ class Director(object):
 
         # setup the camera parameters and setup the new scene (spawn actors)
         self.camera.set_params(self.current_scene.params['Camera'])
-        while self.capture_pauser.is_paused():
-            self.capture_pauser.tick()
-        self.cam_idx = 0
-        self.camera.use_param(self.cam_idx)
+        self.camera.use_param(idx=0)
         self.current_scene.play_run()
 
         # if the scene is not valid (because of overlapping actors for

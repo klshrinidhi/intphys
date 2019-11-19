@@ -17,8 +17,12 @@ DEFAULT_RESOLUTION = (288, 288)
 # the textures being completetly loaded)
 DEFAULT_PAUSE_DURATION = 50
 
+# the number of cams per scene
+NUM_CAMS_PER_SCENE = 8
+
 # the number of frames captured for each scene
-NUM_FRAMES_PER_SCENE = 50
+NUM_FRAMES_PER_SCENE = NUM_CAMS_PER_SCENE * 8
+
 
 
 class Main:
@@ -93,6 +97,7 @@ class Main:
             world,
             scenes_json,
             size,
+            NUM_CAMS_PER_SCENE,
             output_dir,
             seed or random.randint(0, 1e9),
             pause_duration=pause_duration)
